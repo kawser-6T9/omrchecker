@@ -1,1 +1,90 @@
-omrchecker
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OMR Checker - User Panel</title>
+  <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-2xl bg-white rounded-2xl shadow p-6">
+    <h1 class="text-2xl font-bold text-center mb-4">OMR Checker - User Panel</h1>
+
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <select id="board" class="border p-2 rounded">
+        <option>ঢাকা বোর্ড</option><option>চট্টগ্রাম বোর্ড</option><option>রাজশাহী বোর্ড</option><option>কুমিল্লা বোর্ড</option>
+        <option>যশোর বোর্ড</option><option>বরিশাল বোর্ড</option><option>সিলেট বোর্ড</option><option>ময়মনসিংহ বোর্ড</option>
+        <option>দিনাজপুর বোর্ড</option><option>মাদ্রাসা বোর্ড</option><option>কারিগরি বোর্ড</option>
+      </select>
+      <input id="year" type="number" placeholder="সাল (যেমন 2024)" class="border p-2 rounded" />
+      <select id="subject" class="border p-2 rounded col-span-2">
+        <option value="101">বাংলা ১ম পত্র - ১০১</option>
+        <option value="102">বাংলা ২য় পত্র - ১০২</option>
+        <option value="108">ইংরেজি ১ম পত্র - ১০৮</option>
+        <option value="109">ইংরেজি ২য় পত্র - ১০৯</option>
+        <option value="275">তথ্য ও যোগাযোগ প্রযুক্তি - ২৭৫</option>
+        <option value="267">ইসলামের ইতিহাস ১ম - ২৬৭</option>
+        <option value="268">ইসলামের ইতিহাস ২য় - ২৬৮</option>
+        <option value="269">পৌরনীতি ১ম - ২৬৯</option>
+        <option value="270">পৌরনীতি ২য় - ২৭০</option>
+        <!-- আরও সাবজেক্ট যুক্ত করতে পারো -->
+      </select>
+      <select id="set" class="border p-2 rounded">
+        <option>ক</option><option>খ</option><option>গ</option><option>ঘ</option>
+      </select>
+    </div>
+
+    <textarea id="userAnswers" rows="5" class="w-full border p-2 rounded mb-4" placeholder="তোমার উত্তর টাইপ করো: ক, খ, গ, ঘ, ..."></textarea>
+
+    <button onclick="checkAnswers()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">🧠 মিলাও</button>
+
+    <div id="result" class="mt-6 text-center text-lg font-semibold"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAhqfXhv2ikNKYDjs5WfEk0R99Az1XPjM8",
+      authDomain: "omrchecker-884d2.firebaseapp.com",
+      projectId: "omrchecker-884d2",
+      storageBucket: "omrchecker-884d2.appspot.com",
+      messagingSenderId: "706020565677",
+      appId: "1:706020565677:web:ef04e86db3caca05841c24"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function checkAnswers() {
+      const board = document.getElementById('board').value.trim();
+      const year = document.getElementById('year').value.trim();
+      const subject = document.getElementById('subject').value.trim();
+      const set = document.getElementById('set').value.trim();
+      const inputText = document.getElementById('userAnswers').value.trim();
+      const userAnswers = inputText.split(',').map(a => a.trim());
+
+      const docRef = db.doc(`answers/${board}/${year}/${subject}/${set}`);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        document.getElementById('result').innerText = '❌ এই তথ্যের কোনো উত্তর পাওয়া যায়নি!';
+        return;
+      }
+
+      const correctAnswers = doc.data().answers;
+      let correct = 0;
+      for (let i = 0; i < correctAnswers.length; i++) {
+        if (userAnswers[i] && userAnswers[i] === correctAnswers[i]) {
+          correct++;
+        }
+      }
+
+      const total = correctAnswers.length;
+      const wrong = total - correct;
+
+      document.getElementById('result').innerText = `✅ সঠিক: ${correct} টি | ❌ ভুল: ${wrong} টি | মোট: ${total}`;
+    }
+  </script>
+</body>
+</html>
