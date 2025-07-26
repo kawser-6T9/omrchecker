@@ -58,7 +58,13 @@
 </div>
 
 <textarea id="userAnswers" rows="5" class="w-full border p-2 rounded mb-4" placeholder="তোমার উত্তর টাইপ করো: ক, খ, গ, ঘ, ..."></textarea>
+<!-- স্ক্যান করার ইনপুট ও স্ক্রিপ্ট যুক্ত করো -->
+<div class="mb-4">
+  <input type="file" onchange="handleOMRUpload(event)" accept="image/*" class="border p-2 rounded w-full">
+</div>
 
+<!-- নিচে স্ক্রিপ্ট ফাইল লিংক -->
+<script src="scripts/omr-reader.js"></script>
 <div class="flex gap-2 mb-4">
   <input type="file" id="omrImage" accept="image/*" class="border p-2 rounded w-full">
   <button onclick="readOMRImage()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">📷 স্ক্যান</button>
