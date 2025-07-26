@@ -1,1 +1,251 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OMR Checker</title>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 1em; max-width: 600px; margin: auto; }
+    label, select, input, textarea, button { display: block; margin: 10px 0; width: 100%; }
+    .result { margin-top: 20px; font-weight: bold; }
+    textarea { height: 100px; }
+  </style>
+</head>
+<body>
+  <h2>OMR Checker - অ্যাডমিন প্যানেল</h2>
+  <label>বিষয়
+    <select id="subject">
+      <option value="101">বাংলা ১ম পত্র</option>
+      <option value="102">বাংলা ২য় পত্র</option>
+      <option value="108">ইংরেজি ১ম পত্র</option>
+      <option value="109">ইংরেজি ২য় পত্র</option>
+      <option value="275">তথ্য ও যোগাযোগ প্রযুক্তি</option>
+      <option value="267">ইসলামের ইতিহাস ও সংস্কৃতি ১ম পত্র</option>
+      <option value="268">ইসলামের ইতিহাস ও সংস্কৃতি ২য় পত্র</option>
+      <option value="269">পৌরনীতি ও সুশাসন ১ম পত্র</option>
+      <option value="270">পৌরনীতি ও সুশাসন ২য় পত্র</option>
+      <option value="110">অর্থনীতি ২য় পত্র</option>
+      <option value="271">সমাজকর্ম ১ম পত্র</option>
+      <option value="272">সমাজকর্ম ২য় পত্র</option>
+      <option value="121">যুক্তিবিদ্যা ১ম পত্র</option>
+      <option value="122">যুক্তিবিদ্যা ২য় পত্র</option>
+      <option value="123">মনোবিজ্ঞান ১ম পত্র</option>
+      <option value="124">মনোবিজ্ঞান ২য় পত্র</option>
+      <option value="249">ইসলাম শিক্ষা ১ম পত্র</option>
+      <option value="250">ইসলাম শিক্ষা ২য় পত্র</option>
+      <option value="225">চারু ও কারুকলা ১ম পত্র</option>
+      <option value="226">চারু ও কারুকলা ২য় পত্র</option>
+      <option value="273">গার্হস্থ্য বিজ্ঞান ১ম পত্র</option>
+      <option value="274">গার্হস্থ্য বিজ্ঞান ২য় পত্র</option>
+      <option value="125">ভূগোল ও পরিবেশ ১ম পত্র</option>
+      <option value="126">ভূগোল ও পরিবেশ ২য় পত্র</option>
+      <option value="113">সমাজবিজ্ঞান ১ম পত্র</option>
+      <option value="114">সমাজবিজ্ঞান ২য় পত্র</option>
+      <option value="127">ইতিহাস ১ম পত্র</option>
+      <option value="128">ইতিহাস ২য় পত্র</option>
+      <option value="119">দর্শন ১ম পত্র</option>
+      <option value="120">দর্শন ২য় পত্র</option>
+      <option value="221">সংগীত ১ম পত্র</option>
+      <option value="222">সংগীত ২য় পত্র</option>
+    </select>
+  </label>
+  <label>সাল <input id="year" /></label>
+  <label>বোর্ড
+    <select id="board">
+      <option value="DHAKA">ঢাকা</option>
+      <option value="Ctg">চট্টগ্রাম</option>
+      <option value="RAJSHAHI">রাজশাহী</option>
+      <option value="BARISAL">বরিশাল</option>
+      <option value="SYLHET">সিলেট</option>
+      <option value="DINAJPUR">দিনাজপুর</option>
+      <option value="COMILLA">কুমিল্লা</option>
+      <option value="JESSORE">যশোর</option>
+      <option value="Mymensingh">ময়মনসিংহ</option>
+      <option value="Madrasah">মাদ্রাসা</option>
+      <option value="Technical">টেকনিক্যাল</option>
+    </select>
+  </label>
+  <label>সেট <input id="set" /></label>
+  <label>সঠিক উত্তর (কমা দিয়ে দিন, যেমন: ক,খ,গ,ঘ)
+    <textarea id="answers"></textarea>
+  </label>
+  <button onclick="saveAnswers()">উত্তর সংরক্ষণ করুন</button>
 
+  <hr />
+  <h2>OMR চেক করুন</h2>
+  <label>বিষয়
+    <select id="c_subject">
+      <option value="101">বাংলা ১ম পত্র</option>
+      <option value="102">বাংলা ২য় পত্র</option>
+      <option value="108">ইংরেজি ১ম পত্র</option>
+      <option value="109">ইংরেজি ২য় পত্র</option>
+      <option value="275">তথ্য ও যোগাযোগ প্রযুক্তি</option>
+      <option value="267">ইসলামের ইতিহাস ও সংস্কৃতি ১ম পত্র</option>
+      <option value="268">ইসলামের ইতিহাস ও সংস্কৃতি ২য় পত্র</option>
+      <option value="269">পৌরনীতি ও সুশাসন ১ম পত্র</option>
+      <option value="270">পৌরনীতি ও সুশাসন ২য় পত্র</option>
+      <option value="110">অর্থনীতি ২য় পত্র</option>
+      <option value="271">সমাজকর্ম ১ম পত্র</option>
+      <option value="272">সমাজকর্ম ২য় পত্র</option>
+      <option value="121">যুক্তিবিদ্যা ১ম পত্র</option>
+      <option value="122">যুক্তিবিদ্যা ২য় পত্র</option>
+      <option value="123">মনোবিজ্ঞান ১ম পত্র</option>
+      <option value="124">মনোবিজ্ঞান ২য় পত্র</option>
+      <option value="249">ইসলাম শিক্ষা ১ম পত্র</option>
+      <option value="250">ইসলাম শিক্ষা ২য় পত্র</option>
+      <option value="225">চারু ও কারুকলা ১ম পত্র</option>
+      <option value="226">চারু ও কারুকলা ২য় পত্র</option>
+      <option value="273">গার্হস্থ্য বিজ্ঞান ১ম পত্র</option>
+      <option value="274">গার্হস্থ্য বিজ্ঞান ২য় পত্র</option>
+      <option value="125">ভূগোল ও পরিবেশ ১ম পত্র</option>
+      <option value="126">ভূগোল ও পরিবেশ ২য় পত্র</option>
+      <option value="113">সমাজবিজ্ঞান ১ম পত্র</option>
+      <option value="114">সমাজবিজ্ঞান ২য় পত্র</option>
+      <option value="127">ইতিহাস ১ম পত্র</option>
+      <option value="128">ইতিহাস ২য় পত্র</option>
+      <option value="119">দর্শন ১ম পত্র</option>
+      <option value="120">দর্শন ২য় পত্র</option>
+      <option value="221">সংগীত ১ম পত্র</option>
+      <option value="222">সংগীত ২য় পত্র</option>
+    </select>
+  </label>
+  <label>সাল <input id="c_year" /></label>
+  <label>বোর্ড
+    <select id="c_board">
+      <option value="DHAKA">ঢাকা</option>
+      <option value="Ctg">চট্টগ্রাম</option>
+      <option value="RAJSHAHI">রাজশাহী</option>
+      <option value="BARISAL">বরিশাল</option>
+      <option value="SYLHET">সিলেট</option>
+      <option value="DINAJPUR">দিনাজপুর</option>
+      <option value="COMILLA">কুমিল্লা</option>
+      <option value="JESSORE">যশোর</option>
+      <option value="Mymensingh">ময়মনসিংহ</option>
+      <option value="Madrasah">মাদ্রাসা</option>
+      <option value="Technical">টেকনিক্যাল</option>
+    </select>
+  </label>
+  <label>সেট <input id="c_set" /></label>
+  <label>আপনার উত্তর (কমা দিয়ে দিন)
+    <textarea id="c_answers"></textarea>
+  </label>
+  <button onclick="checkAnswers()">ফলাফল দেখুন</button>
+  <div class="result" id="result"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAhqfXhv2ikNKYDjs5WfEk0R99Az1XPjM8",
+      authDomain: "omrchecker-884d2.firebaseapp.com",
+      projectId: "omrchecker-884d2",
+      storageBucket: "omrchecker-884d2.firebasestorage.app",
+      messagingSenderId: "706020565677",
+      appId: "1:706020565677:android:ef04e86db3caca05841c24"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.saveAnswers = async () => {
+      const subject = subjectEl.value.trim();
+      const year = yearEl.value.trim();
+      const board = boardEl.value.trim();
+      const set = setEl.value.trim();
+      const answers = answersEl.value.trim().split(',').map(s => s.trim());
+      const id = `${subject}_${year}_${board}_${set}`;
+
+      await setDoc(doc(db, "answers", id), {
+        subject, year, board, set, answers
+      });
+      alert("✅ উত্তর সংরক্ষণ হয়েছে");
+    };
+
+    window.checkAnswers = async () => {
+      const subject = c_subject.value.trim();
+      const year = c_year.value.trim();
+      const board = c_board.value.trim();
+      const set = c_set.value.trim();
+      const yourAnswers = c_answers.value.trim().split(',').map(s => s.trim());
+      const id = `${subject}_${year}_${board}_${set}`;
+
+      const docSnap = await getDoc(doc(db, "answers", id));
+      if (!docSnap.exists()) {
+        result.innerText = "❌ উত্তর পাওয়া যায়নি!";
+        return;
+      }
+      const correctAnswers = docSnap.data().answers;
+      let score = 0;
+      let total = correctAnswers.length;
+
+      for (let i = 0; i < total; i++) {
+        if (yourAnswers[i] && yourAnswers[i] === correctAnswers[i]) {
+          score++;
+        }
+      }
+
+      result.innerText = `✅ মোট প্রশ্ন: ${total}, সঠিক: ${score}, ভুল: ${total - score}`;
+    };
+
+    const subjectEl = document.getElementById("subject");
+    const yearEl = document.getElementById("year");
+    const boardEl = document.getElementById("board");
+    const setEl = document.getElementById("set");
+    const answersEl = document.getElementById("answers");
+
+    const c_subject = document.getElementById("c_subject");
+    const c_year = document.getElementById("c_year");
+    const c_board = document.getElementById("c_board");
+    const c_set = document.getElementById("c_set");
+    const c_answers = document.getElementById("c_answers");
+    const result = document.getElementById("result");
+  // Firebase config এবং login() এর পর...
+
+  function saveAnswers() {
+    const board = document.getElementById('board').value.trim();
+    const year = document.getElementById('year').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const set = document.getElementById('set').value.trim();
+    const answersText = document.getElementById('answers').value.trim();
+
+    if (!board || !year || !subject || !set || !answersText) {
+      alert("⚠️ সব ঘর সঠিকভাবে পূরণ করুন!");
+      return;
+    }
+
+    const answersArray = answersText.split(',').map(a => a.trim());
+    const docPath = `answers/${board}/${year}/${subject}/${set}`;
+
+    db.doc(docPath).set({
+      answers: answersArray,
+      createdAt: new Date()
+    }).then(() => {
+      alert("✅ উত্তর সফলভাবে সংরক্ষণ হয়েছে!");
+      document.getElementById('answers').value = "";
+    }).catch((error) => {
+      console.error("🔥 Firestore Error:", error);
+      alert("❌ সংরক্ষণে সমস্যা হয়েছে, কনসোল চেক করুন");
+    });
+  }
+
+  function login() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then((result) => {
+      const email = result.user.email;
+      if (adminEmails.includes(email)) {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('login').style.display = 'none';
+      } else {
+        alert(\"❌ আপনি অ্যাডমিন না, তাই প্রবেশ করতে পারবেন না।\");
+      }
+    }).catch((error) => {
+      console.error(\"Login error\", error);
+    });
+  }
+  </script>
+</body>
+  </html>
+                                        
